@@ -12,27 +12,39 @@ export default new Router({
   routes: [
     {
       path: '/',
-      component: Msite
+      redirect: '/msite'
     },
     {
       path: '/msite',
       name: 'Msite',
-      component: Msite
+      component: Msite,
+      meta: {
+        showFooter: true
+      }
     },
     {
       path: '/order',
       name: 'Order',
-      component: Order
+      component: Order,
+      meta: {
+        showFooter: true
+      }
     },
     {
       path: '/search',
       name: 'Search',
-      component: Search
+      component: Search,
+      meta: {
+        showFooter: true
+      }
     },
     {
       path: '/profile',
       name: 'Profile',
-      component: Profile
+      component: Profile,
+      meta: {
+        showFooter: true
+      }
     },
     {
       path: '/login',

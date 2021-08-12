@@ -82,7 +82,6 @@ export default {
   mounted() {
     this.$store.dispatch('getFoodCategories')
     this.$store.dispatch('getShops')
-    /* eslint-disable no-new */
   }
 }
 </script>
