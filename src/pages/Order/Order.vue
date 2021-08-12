@@ -4,7 +4,11 @@
     <section class="order_no_login">
       <img src="./images/person.png" />
       <h3>登录后查看外卖订单</h3>
-      <button>立即登陆</button>
+      <router-link to="/login" class="router">
+        <button>
+          立即登陆
+        </button>
+      </router-link>
     </section>
   </section>
 </template>
@@ -35,15 +39,17 @@ export default {
       font-size: 17px;
       color: #6a6a6a;
     }
-    > button {
-      display: inline-block;
-      background: @red;
-      font-size: 14px;
-      color: #fff;
-      border: 0;
-      outline: none;
-      border-radius: 6px;
-      padding: 5px 14px;
+    .router {
+      > button {
+        display: inline-block;
+        background: @red;
+        font-size: 14px;
+        color: #fff;
+        border: 0;
+        outline: none;
+        border-radius: 6px;
+        padding: 5px 14px;
+      }
     }
   }
 }

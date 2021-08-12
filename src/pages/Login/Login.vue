@@ -2,47 +2,91 @@
   <section class="loginContainer">
     <div class="loginInner">
       <div class="login_header">
-        <h2 class="login_logo">硅谷外卖</h2>
+        <h2 class="login_logo">登录</h2>
         <div class="login_header_title">
-          <a href="javascript:;" class="on">短信登录</a>
-          <a href="javascript:;">密码登录</a>
+          <a
+            href="javascript:;"
+            :class="{ on: phoneOrAcount }"
+            @click="phoneOrAcount = true"
+            >短信登录</a
+          >
+          <a
+            href="javascript:;"
+            :class="{ on: !phoneOrAcount }"
+            @click="phoneOrAcount = false"
+            >账号登录</a
+          >
         </div>
       </div>
       <div class="login_content">
-        <form>
-          <div class="on">
+        <form @submit.prevent="login">
+          <div :class="{ on: phoneOrAcount }">
             <section class="login_message">
-              <input type="tel" maxlength="11" placeholder="手机号" />
-              <button disabled="disabled" class="get_verification">
+              <input
+                type="tel"
+                maxlength="11"
+                placeholder="手机号"
+                v-model="phoneNumber"
+              />
+              <button
+                v-if="!countDown"
+                :disabled="!rightPhone"
+                class="get_verification"
+                :class="{ right_phone: rightPhone }"
+                @click.prevent="getVerificationCode()"
+              >
                 获取验证码
+              </button>
+              <button v-else disabled="disabled" class="get_verification">
+                已发送({{ countDown }}s)
               </button>
             </section>
             <section class="login_verification">
-              <input type="tel" maxlength="8" placeholder="验证码" />
+              <input
+                type="number"
+                maxlength="6"
+                placeholder="验证码"
+                v-model="phoneVerificationCode"
+                oninput="if(value.length>6)value=value.slice(0,6)"
+              />
             </section>
             <section class="login_hint">
               温馨提示：未注册硅谷外卖帐号的手机号，登录时将自动注册，且代表已同意
               <a href="javascript:;">《用户服务协议》</a>
             </section>
           </div>
-          <div class="on1">
+          <div :class="{ on: !phoneOrAcount }">
             <section>
               <section class="login_message">
                 <input
                   type="tel"
                   maxlength="11"
                   placeholder="手机/邮箱/用户名"
+                  v-model="account"
                 />
               </section>
               <section class="login_verification">
-                <input type="tel" maxlength="8" placeholder="密码" />
-                <div class="switch_button off">
+                <input
+                  :type="showPwd ? 'text' : 'password'"
+                  maxlength="16"
+                  placeholder="密码"
+                  v-model="pwd"
+                />
+                <div
+                  class="switch_button"
+                  @click="showPwd = !showPwd"
+                  :class="showPwd ? 'off' : 'on'"
+                >
                   <div class="switch_circle"></div>
-                  <span class="switch_text">...</span>
                 </div>
               </section>
               <section class="login_message">
-                <input type="text" maxlength="11" placeholder="验证码" />
+                <input
+                  type="text"
+                  maxlength="11"
+                  placeholder="验证码"
+                  v-model="accountVerificationCode"
+                />
                 <img
                   class="get_verification"
                   src="./images/captcha.svg"
@@ -59,11 +103,80 @@
         <i class="iconfont icon-iconarrowl"></i>
       </a>
     </div>
+    <AlertTip
+      :alertText="alertText"
+      @confirmTip="confirmTip"
+      v-if="isShowAlert"
+    />
   </section>
 </template>
 
 <script>
-export default {}
+import AlertTip from '@/components/AlertTip/AlertTip'
+export default {
+  components: { AlertTip },
+  data() {
+    return {
+      phoneOrAcount: true,
+      phoneNumber: '',
+      countDown: 0,
+      phoneVerificationCode: '',
+      account: '',
+      pwd: '',
+      showPwd: false,
+      accountVerificationCode: '',
+      isShowAlert: false,
+      alertText: ''
+    }
+  },
+  computed: {
+    rightPhone() {
+      return /^1\d{10}$/.test(this.phoneNumber)
+    }
+  },
+  methods: {
+    // 获取手机验证码
+    getVerificationCode() {
+      if (!this.countDown) {
+        this.countDown = 30
+        const countDownInterval = setInterval(() => {
+          this.countDown--
+          if (this.countDown <= 0) {
+            clearInterval(countDownInterval)
+          }
+        }, 1000)
+      }
+    },
+    confirmTip() {
+      this.isShowAlert = false
+      this.alertText = ''
+    },
+    showAlert(text) {
+      this.isShowAlert = true
+      this.alertText = text
+    },
+    // 登录
+    login() {
+      if (this.phoneOrAcount) {
+        const { rightPhone, phoneVerificationCode } = this
+        if (!rightPhone) {
+          this.showAlert('手机号码不正确')
+        } else if (!/^\d{6}$/.test(phoneVerificationCode)) {
+          this.showAlert('验证码为6位数字')
+        }
+      } else {
+        const { account, pwd, accountVerificationCode } = this
+        if (!account) {
+          this.showAlert('用户名不能为空')
+        } else if (!pwd) {
+          this.showAlert('密码不能为空')
+        } else if (!accountVerificationCode) {
+          this.showAlert('验证码不能为空')
+        }
+      }
+    }
+  }
+}
 </script>
 
 <style lang="less" scope>
@@ -137,6 +250,9 @@ export default {}
               color: #ccc;
               font-size: 14px;
               background: transparent;
+              &.right_phone {
+                color: black;
+              }
             }
           }
           .login_verification {
@@ -146,7 +262,6 @@ export default {}
             font-size: 14px;
             background: #fff;
             .switch_button {
-              font-size: 12px;
               border: 1px solid #ddd;
               border-radius: 8px;
               transition: background-color 0.3s, border-color 0.3s;
@@ -161,13 +276,15 @@ export default {}
               transform: translateY(-50%);
               &.off {
                 background: #fff;
-                .switch_text {
-                  float: right;
-                  color: #ddd;
+                > .switch_circle {
+                  transform: translateX(0px);
                 }
               }
               &.on {
                 background: @red;
+                > .switch_circle {
+                  transform: translateX(14px);
+                }
               }
               > .switch_circle {
                 position: absolute;
@@ -207,7 +324,7 @@ export default {}
           border: 0;
         }
       }
-      .about_us{
+      .about_us {
         display: block;
         font-size: 12px;
         margin-top: 20px;
@@ -215,13 +332,13 @@ export default {}
         color: #999;
       }
     }
-    .go_back{
+    .go_back {
       position: absolute;
       top: 8px;
       left: 6px;
       width: 30px;
       height: 30px;
-      >.iconfont{
+      > .iconfont {
         font-size: 20px;
         color: #999;
       }
