@@ -2,17 +2,24 @@
   <section class="profile">
     <HeaderTop title="我的" />
     <section class="profile-number">
-      <router-link to="/login" class="profile-link">
+      <router-link
+        :to="userInfo._id ? '/userinfo' : '/login'"
+        class="profile-link"
+      >
         <div class="profile_image">
           <i class="iconfont icon-ren"></i>
         </div>
         <div class="user-info">
-          <p class="user-info-top">登录/注册</p>
+          <p class="user-info-top" v-if="!userInfo.phone">
+            {{ userInfo.name || '登录/注册' }}
+          </p>
           <p>
             <span class="user-icon">
               <i class="iconfont icon-shoujitongxun icon-mobile"></i>
             </span>
-            <span class="icon-mobile-number">暂无绑定手机号</span>
+            <span class="icon-mobile-number">{{
+              userInfo.phone || '暂无绑定手机号'
+            }}</span>
           </p>
         </div>
         <span class="arrow">
@@ -85,14 +92,42 @@
           </span>
         </div>
       </a>
+      <el-button
+        type="danger"
+        class="logout"
+        v-if="userInfo._id"
+        @click="logout"
+      >
+        退出登录
+      </el-button>
     </section>
   </section>
 </template>
 
 <script>
+import { mapState } from 'vuex'
 import HeaderTop from '@/components/HeaderTop/HeaderTop'
 export default {
-  components: { HeaderTop }
+  computed: { ...mapState(['userInfo']) },
+  components: { HeaderTop },
+  methods: {
+    logout() {
+      this.$confirm('确认退出登录？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(_ => {
+          this.$store.dispatch('logout')
+          this.$message({
+            showClose: true,
+            message: '退出成功',
+            type: 'success'
+          })
+        })
+        .catch(_ => {})
+    }
+  }
 }
 </script>
 
@@ -111,14 +146,15 @@ export default {
       padding: 20px 10px;
       .profile_image {
         float: left;
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
         overflow: hidden;
         vertical-align: top;
         .icon-ren {
-          background: #e4e4e4;
-          font-size: 62px;
+          background: #a5a5a5;
+          color: white;
+          font-size: 50px;
         }
       }
       .user-info {
@@ -196,17 +232,17 @@ export default {
           padding-bottom: 10px;
         }
       }
-      .info_data_link:nth-of-type(2){
-        .info_data_top{
-          span{
+      .info_data_link:nth-of-type(2) {
+        .info_data_top {
+          span {
             color: #ff5f3e;
           }
         }
       }
-      .info_data_link:nth-of-type(3){
+      .info_data_link:nth-of-type(3) {
         border: 0;
-        .info_data_top{
-          span{
+        .info_data_top {
+          span {
             color: #6ac20b;
           }
         }
@@ -266,6 +302,20 @@ export default {
         }
       }
     }
+    .logout {
+      width: 100%;
+      margin-top: 6px;
+    }
   }
+}
+.el-message-box {
+  position: absolute;
+  width: 70%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.el-message--success {
+  transform: translate(-50%, -50%);
 }
 </style>

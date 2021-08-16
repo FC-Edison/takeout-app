@@ -88,9 +88,11 @@
                   v-model="accountVerificationCode"
                 />
                 <img
+                  ref="captcha"
                   class="get_verification"
-                  src="./images/captcha.svg"
+                  src="http://localhost:4000/captcha"
                   alt="captcha"
+                  @click="getCaptcha"
                 />
               </section>
             </section>
@@ -113,6 +115,7 @@
 
 <script>
 import AlertTip from '@/components/AlertTip/AlertTip'
+import { reqUsernameLogin, reqVerificationCode, reqSmsLogin } from '@/api'
 export default {
   components: { AlertTip },
   data() {
@@ -136,44 +139,82 @@ export default {
   },
   methods: {
     // 获取手机验证码
-    getVerificationCode() {
+    async getVerificationCode() {
       if (!this.countDown) {
         this.countDown = 30
-        const countDownInterval = setInterval(() => {
+        this.countDownInterval = setInterval(() => {
           this.countDown--
           if (this.countDown <= 0) {
-            clearInterval(countDownInterval)
+            clearInterval(this.countDownInterval)
           }
         }, 1000)
+        const result = await reqVerificationCode(this.phoneNumber)
+        if (result.code === 1) {
+          this.showAlert(result.msg)
+          this.countDown = 0
+          clearInterval(this.countDownInterval)
+          this.countDownInterval = null
+        }
       }
     },
+    // 取消弹窗
     confirmTip() {
       this.isShowAlert = false
       this.alertText = ''
     },
+    // 显示弹窗
     showAlert(text) {
       this.isShowAlert = true
       this.alertText = text
     },
     // 登录
-    login() {
+    async login() {
+      const { showAlert } = this
+      let result
       if (this.phoneOrAcount) {
-        const { rightPhone, phoneVerificationCode } = this
+        const { rightPhone, phoneVerificationCode, phoneNumber } = this
         if (!rightPhone) {
-          this.showAlert('手机号码不正确')
+          showAlert('手机号码不正确')
+          return
         } else if (!/^\d{6}$/.test(phoneVerificationCode)) {
-          this.showAlert('验证码为6位数字')
+          showAlert('验证码为6位数字')
+          return
         }
+        result = await reqSmsLogin(phoneNumber, phoneVerificationCode)
       } else {
         const { account, pwd, accountVerificationCode } = this
         if (!account) {
-          this.showAlert('用户名不能为空')
+          showAlert('用户名不能为空')
+          return
         } else if (!pwd) {
-          this.showAlert('密码不能为空')
+          showAlert('密码不能为空')
+          return
         } else if (!accountVerificationCode) {
-          this.showAlert('验证码不能为空')
+          showAlert('验证码不能为空')
+          return
         }
+        result = await reqUsernameLogin({
+          account,
+          pwd,
+          accountVerificationCode
+        })
       }
+      if (result.code === 1) {
+        showAlert(result.msg)
+        this.getCaptcha()
+        return
+      }
+      if (this.countDown) {
+        this.countDown = 0
+        clearInterval(this.countDownInterval)
+        this.countDownInterval = null
+      }
+      this.$store.dispatch('recordUser', result.data)
+      this.$router.back()
+    },
+    // 获取验证码
+    getCaptcha() {
+      this.$refs.captcha.src = `http://localhost:4000/captcha?time=${Date.now()}`
     }
   }
 }

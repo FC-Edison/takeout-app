@@ -1,9 +1,11 @@
 import {
   RECEIVE_ADDRESS,
   RECEIVE_CATEGORIES,
-  RECEIVE_SHOPS
+  RECEIVE_SHOPS,
+  RECEIVE_USER_INFO,
+  RESET_USER_INFO
 } from './mutation-types'
-import { reqAddress, reqFoodCategories, reqShops } from '../api'
+import { reqAddress, reqFoodCategories, reqShops, reqUserInfo, reqLogout } from '../api'
 
 export default {
   // 异步获取地址
@@ -31,6 +33,28 @@ export default {
     // 提交一个mutation
     if (result.code === 0) {
       commit(RECEIVE_SHOPS, { shops: result.data })
+    }
+  },
+
+  // 同步保存用户信息
+  recordUser({ commit }, userInfo) {
+    commit(RECEIVE_USER_INFO, { userInfo })
+  },
+
+  // 异步根据session获取用户信息
+  async getUserInfo({ commit }) {
+    const result = await reqUserInfo()
+    if (result.code === 0) {
+      const userInfo = result.data
+      commit(RECEIVE_USER_INFO, { userInfo })
+    }
+  },
+
+  // 异步退出登录
+  async logout({ commit }) {
+    const result = await reqLogout()
+    if (result.code === 0) {
+      commit(RESET_USER_INFO)
     }
   }
 }

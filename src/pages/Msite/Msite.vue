@@ -1,12 +1,21 @@
 <template>
   <section class="msite">
     <HeaderTop :title="address.name">
-      <span class="header_search" slot="left">
+      <router-link class="header_search" to="/search" slot="left">
         <i class="iconfont icon-sousuo"></i>
-      </span>
-      <span class="header_login" slot="right">
-        <span class="header_login_text">登录|注册</span>
-      </span>
+      </router-link>
+      <router-link
+        class="header_login"
+        slot="right"
+        :to="userInfo._id ? '/userinfo' : '/login'"
+      >
+        <span class="header_login_text" v-if="!userInfo._id">
+          登录|注册
+        </span>
+        <span class="header_login_text" v-else>
+          <i class="iconfont icon-wode1"></i>
+        </span>
+      </router-link>
     </HeaderTop>
     <nav class="msite_nav">
       <div class="swiper-container" v-if="categorysArr.length">
@@ -53,7 +62,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['address', 'categories']),
+    ...mapState(['address', 'categories', 'userInfo']),
     categorysArr() {
       const { categories } = this
       let arr = []
@@ -90,6 +99,32 @@ export default {
 @import '~@/assets/less/mixins.less';
 .msite {
   width: 100%;
+  .header_search {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10%;
+    height: 50%;
+    .icon-sousuo {
+      font-size: 22px;
+      color: #fff;
+    }
+  }
+  .header_login {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    .header_login_text {
+      font-size: 14px;
+      color: #fff;
+      .iconfont {
+        font-size: 26px;
+        font-weight: 400;
+      }
+    }
+  }
   .msite_nav {
     .bottom-border-1px(#e4e4e4);
     margin-top: 45px;

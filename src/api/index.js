@@ -19,15 +19,20 @@ export const reqShopsByKeyword = (geohash, keyword) =>
 export const reqCaptcha = () => ajax(BASE_URL + `/captcha`)
 
 // 6、用户名密码登陆
-export const reqUsernameLogin = (name, pwd, captcha) =>
-  ajax(BASE_URL + `/login_pwd`, { name, pwd, captcha }, 'POST')
+export const reqUsernameLogin = ({ account, pwd, accountVerificationCode }) =>
+  ajax(
+    BASE_URL + `/login_pwd`,
+    { name: account, pwd, captcha: accountVerificationCode },
+    'POST'
+  )
 
 // 7、发送短信验证码
-export const reqVerificationCode = phone => ajax(BASE_URL + `/sendcode`, { phone })
+export const reqVerificationCode = phone =>
+  ajax(BASE_URL + `/sendcode`, { phone })
 
 // 8、手机号验证码登陆
-export const reqVerificationCodeLogin = (phone, code) =>
-  ajax(BASE_URL + `/login_sms`, { phone, code })
+export const reqSmsLogin = (phone, code) =>
+  ajax(BASE_URL + `/login_sms`, { phone, code }, 'POST')
 
 // 9、根据会话获取用户信息
 export const reqUserInfo = () => ajax(BASE_URL + `/userinfo`)

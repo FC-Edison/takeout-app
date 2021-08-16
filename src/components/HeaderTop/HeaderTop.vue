@@ -25,18 +25,6 @@ export default {
   top: 0;
   width: 100%;
   height: 45px;
-  .header_search {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 10%;
-    height: 50%;
-    .icon-sousuo {
-      font-size: 22px;
-      color: #fff;
-    }
-  }
   .header_title {
     position: absolute;
     top: 50%;
@@ -49,16 +37,6 @@ export default {
       color: #fff;
       // 通过块元素设置宽度来实现多余文字省略号
       display: block;
-    }
-  }
-  .header_login {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    .header_login_text {
-      font-size: 14px;
-      color: #fff;
     }
   }
 }
