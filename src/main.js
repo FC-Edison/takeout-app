@@ -6,6 +6,8 @@ import router from './router'
 import store from './store'
 import element from '@/element'
 
+import '@/mock/mockServer'
+
 Vue.use(element)
 
 Vue.config.productionTip = false
