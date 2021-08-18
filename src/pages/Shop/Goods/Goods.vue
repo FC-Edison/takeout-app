@@ -1,67 +1,80 @@
 <template>
-  <div class="goods">
-    <div class="menu-wrapper">
-      <ul>
-        <li
-          class="menu-item"
-          v-for="(good, index) in goods"
-          :key="index"
-          :class="{ current: index === currentIndex }"
-          @click="clickMenuItem(index)"
-        >
-          <span class="text bottom-border-1px">
-            <img class="icon" :src="good.icon" v-if="good.icon" />
-            {{ good.name }}
-          </span>
-        </li>
-      </ul>
-    </div>
+  <div>
+    <div class="goods">
+      <div class="menu-wrapper">
+        <ul>
+          <li
+            class="menu-item"
+            v-for="(good, index) in goods"
+            :key="index"
+            :class="{ current: index === currentIndex }"
+            @click="clickMenuItem(index)"
+          >
+            <span class="text bottom-border-1px">
+              <img class="icon" :src="good.icon" v-if="good.icon" />
+              {{ good.name }}
+            </span>
+          </li>
+        </ul>
+      </div>
 
-    <div class="foods-wrapper" ref="foodsUl">
-      <ul>
-        <li class="food-list-hook" v-for="(good, index) in goods" :key="index">
-          <h1 class="title">{{ good.name }}</h1>
-          <ul>
-            <li
-              class="food-item bottom-border-1px"
-              v-for="(food, index) in good.foods"
-              :key="index"
-            >
-              <div class="icon">
-                <img width="57" height="57" :src="food.icon" />
-              </div>
-              <div class="content">
-                <h2 class="name">{{ food.name }}</h2>
-                <p class="desc">{{ food.description }}</p>
-                <div class="extra">
-                  <span class="count">月售{{ food.sellCount }}份</span>
-                  <span>好评率{{ food.rating }}%</span>
+      <div class="foods-wrapper" ref="foodsUl">
+        <ul>
+          <li
+            class="food-list-hook"
+            v-for="(good, index) in goods"
+            :key="index"
+          >
+            <h1 class="title">{{ good.name }}</h1>
+            <ul>
+              <li
+                class="food-item bottom-border-1px"
+                v-for="(food, index) in good.foods"
+                :key="index"
+                @click="showInfo(food)"
+              >
+                <div class="icon">
+                  <img width="57" height="57" :src="food.icon" />
                 </div>
-                <div class="price">
-                  <span class="now">￥{{ food.price }}</span>
-                  <span class="old" v-if="food.oldPrice"
-                    >￥{{ food.oldPrice }}</span
-                  >
+                <div class="content">
+                  <h2 class="name">{{ food.name }}</h2>
+                  <p class="desc">{{ food.description }}</p>
+                  <div class="extra">
+                    <span class="count">月售{{ food.sellCount }}份</span>
+                    <span>好评率{{ food.rating }}%</span>
+                  </div>
+                  <div class="price">
+                    <span class="now">￥{{ food.price }}</span>
+                    <span class="old" v-if="food.oldPrice"
+                      >￥{{ food.oldPrice }}</span
+                    >
+                  </div>
+                  <div class="cartcontrol-wrapper">
+                    <CartControl :food="food" />
+                  </div>
                 </div>
-                <div class="cartcontrol-wrapper">
-                  CartControl
-                </div>
-              </div>
-            </li>
-          </ul>
-        </li>
-      </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <ShopCart />
     </div>
+    <FoodInfo :food="food" ref="foodInfo" />
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
 import BScroll from 'better-scroll'
+import CartControl from '@/components/CartControl/CartControl'
+import FoodInfo from '@/components/FoodInfo/FoodInfo'
+import ShopCart from '../../../components/ShopCart/ShopCart.vue'
 
 export default {
+  components: { CartControl, FoodInfo, ShopCart },
   data() {
-    return { scrollY: 0, tops: [] }
+    return { scrollY: 0, tops: [], food: {} }
   },
   computed: {
     ...mapState(['goods']),
@@ -122,6 +135,12 @@ export default {
         arr.push(top)
       })
       this.tops = arr
+    },
+
+    // 显示食品信息
+    showInfo(food) {
+      this.food = food
+      this.$refs.foodInfo.toggleShow()
     }
   },
   mounted() {
@@ -248,8 +267,10 @@ export default {
         }
         .cartcontrol-wrapper {
           position: absolute;
-          right: 0;
-          bottom: 12px;
+          right: -10px;
+          bottom: 14px;
+          height: 20px;
+          width: 100px;
         }
       }
     }

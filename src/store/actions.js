@@ -6,7 +6,10 @@ import {
   RESET_USER_INFO,
   RECEIVE_SHOP_RATINGS,
   RECEIVE_SHOP_INFO,
-  RECEIVE_SHOP_GOODS
+  RECEIVE_SHOP_GOODS,
+  DECREMENT_FOOD_COUNT,
+  INCREMENT_FOOD_COUNT,
+  UPDATE_FOOD_COUNT
 } from './mutation-types'
 import {
   reqAddress,
@@ -96,5 +99,19 @@ export default {
       commit(RECEIVE_SHOP_GOODS, { goods })
       callback && callback()
     }
+  },
+
+  // 同步更新购物车里的count值(通过加减号)
+  updateFoodCount({ commit }, { isAdd, food }) {
+    if (isAdd) {
+      commit(INCREMENT_FOOD_COUNT, { food })
+    } else {
+      commit(DECREMENT_FOOD_COUNT, { food })
+    }
+  },
+
+  // 同步更新购物车里的count值(通过输入框)
+  inputFoodCount({ commit }, { count, food }) {
+    commit(UPDATE_FOOD_COUNT, { food, count })
   }
 }

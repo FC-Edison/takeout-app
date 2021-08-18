@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import {
   RECEIVE_ADDRESS,
   RECEIVE_CATEGORIES,
@@ -6,7 +7,10 @@ import {
   RESET_USER_INFO,
   RECEIVE_SHOP_GOODS,
   RECEIVE_SHOP_INFO,
-  RECEIVE_SHOP_RATINGS
+  RECEIVE_SHOP_RATINGS,
+  DECREMENT_FOOD_COUNT,
+  INCREMENT_FOOD_COUNT,
+  UPDATE_FOOD_COUNT
 } from './mutation-types'
 
 export default {
@@ -40,5 +44,27 @@ export default {
 
   [RECEIVE_SHOP_RATINGS](state, { ratings }) {
     state.ratings = ratings
+  },
+
+  [INCREMENT_FOOD_COUNT](state, { food }) {
+    if (!food.count) {
+      Vue.set(food, 'count', 1)
+      state.cartFoods.push(food)
+    } else {
+      food.count++
+    }
+  },
+
+  [DECREMENT_FOOD_COUNT](state, { food }) {
+    if (food.count) {
+      food.count--
+      if (food.count === 0) {
+        state.cartFoods.splice(state.cartFoods.indexOf(food), 1)
+      }
+    }
+  },
+
+  [UPDATE_FOOD_COUNT](state, { food, count }) {
+    food.count = count
   }
 }
