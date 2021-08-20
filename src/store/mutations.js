@@ -10,7 +10,9 @@ import {
   RECEIVE_SHOP_RATINGS,
   DECREMENT_FOOD_COUNT,
   INCREMENT_FOOD_COUNT,
-  UPDATE_FOOD_COUNT
+  UPDATE_FOOD_COUNT,
+  CLEAR_CART,
+  RECEIVE_SEARCH_SHOPS
 } from './mutation-types'
 
 export default {
@@ -66,5 +68,16 @@ export default {
 
   [UPDATE_FOOD_COUNT](state, { food, count }) {
     food.count = count
+  },
+
+  [CLEAR_CART](state) {
+    state.cartFoods.forEach(food => {
+      food.count = 0
+    })
+    state.cartFoods = []
+  },
+
+  [RECEIVE_SEARCH_SHOPS](state, { searchShops }) {
+    state.searchShops = searchShops
   }
 }

@@ -23,31 +23,36 @@
           </div>
         </div>
       </div>
-      <div class="shopcart-list" v-show="listShow">
-        <div class="list-header">
-          <h1 class="title">购物车</h1>
-          <span class="empty">清空</span>
+      <transition name="swipe">
+        <div class="shopcart-list" v-show="listShow">
+          <div class="list-header">
+            <h1 class="title">购物车</h1>
+            <span class="empty" @click="clearCart">清空</span>
+          </div>
+          <div class="list-content">
+            <ul>
+              <li class="food" v-for="(food, index) in cartFoods" :key="index">
+                <span class="name">{{ food.name }}</span>
+                <div class="price">
+                  <span>￥{{ food.price }}</span>
+                </div>
+                <div class="cartcontrol-wrapper">
+                  <CartControl :food="food" />
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
-        <div class="list-content">
-          <ul>
-            <li class="food" v-for="(food, index) in cartFoods" :key="index">
-              <span class="name">{{ food.name }}</span>
-              <div class="price">
-                <span>￥{{ food.price }}</span>
-              </div>
-              <div class="cartcontrol-wrapper">
-                <CartControl :food="food" />
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
+      </transition>
     </div>
-    <div class="list-mask" v-show="listShow" @click="toggleShow"></div>
+    <transition name="fade">
+      <div class="list-mask" v-show="listShow" @click="toggleShow"></div>
+    </transition>
   </div>
 </template>
 
 <script>
+import BScroll from 'better-scroll'
 import { mapState, mapGetters } from 'vuex'
 import CartControl from '../CartControl/CartControl.vue'
 export default {
@@ -76,9 +81,13 @@ export default {
       }
     },
     listShow() {
-      // 如果总数量为0, 直接不显示
       if (this.totalCount === 0) {
         return false
+      }
+      if (this.scroll) {
+        this.$nextTick(() => {
+          this.scroll.refresh()
+        })
       }
       return this.isShow
     }
@@ -89,13 +98,35 @@ export default {
       if (this.totalCount > 0) {
         this.isShow = !this.isShow
       }
+    },
+    clearCart() {
+      this.$confirm('确认清空购物车？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(_ => {
+          this.$store.dispatch('clearCart')
+          this.$message({
+            showClose: true,
+            message: '清空完成',
+            type: 'success'
+          })
+        })
+        .catch(_ => {})
     }
   },
   watch: {
     listShow() {
-      // 如果总数量为0, 直接不显示
       if (this.totalCount === 0) {
         this.isShow = false
+      }
+      if (!this.scroll) {
+        this.$nextTick(() => {
+          this.scroll = new BScroll('.list-content', {
+            click: true
+          })
+        })
       }
     }
   },
@@ -286,12 +317,22 @@ export default {
   background: rgba(7, 17, 27, 0.6);
   &.fade-enter-active,
   &.fade-leave-active {
-    transition: all 0.5s;
+    transition: all 0.3s;
   }
   &.fade-enter,
   &.fade-leave-to {
     opacity: 0;
     background: rgba(7, 17, 27, 0);
   }
+}
+.el-message-box {
+  position: absolute;
+  width: 70%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.el-message--success {
+  transform: translate(-50%, -50%);
 }
 </style>
